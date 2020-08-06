@@ -1,3 +1,7 @@
+## 0.5.10
+
+* Throttling option added to image stream call.
+
 ## 0.5.9
 
 * Preview image stream resolution limit dropped.

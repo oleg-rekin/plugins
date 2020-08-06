@@ -22,6 +22,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.os.SystemClock;
 import android.util.Size;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Camera {
   private final SurfaceTextureEntry flutterTexture;
@@ -432,7 +434,7 @@ public class Camera {
         new EventChannel.StreamHandler() {
           @Override
           public void onListen(Object o, EventChannel.EventSink imageStreamSink) {
-            setImageStreamImageAvailableListener(imageStreamSink);
+            setImageStreamImageAvailableListener(imageStreamSink, 0);
           }
 
           @Override
@@ -442,9 +444,40 @@ public class Camera {
         });
   }
 
-  private void setImageStreamImageAvailableListener(final EventChannel.EventSink imageStreamSink) {
+    public void startPreviewWithImageStreamWithThrottling(EventChannel imageStreamChannel, int minPauseBetweenFramesMillis)
+            throws CameraAccessException {
+        int validatedMinPauseBetweenFramesMillis = Math.max(minPauseBetweenFramesMillis, 0);
+        createCaptureSession(CameraDevice.TEMPLATE_RECORD, imageStreamReader.getSurface());
+
+        imageStreamChannel.setStreamHandler(
+                new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object o, EventChannel.EventSink imageStreamSink) {
+                        setImageStreamImageAvailableListener(imageStreamSink, validatedMinPauseBetweenFramesMillis);
+                    }
+
+                    @Override
+                    public void onCancel(Object o) {
+                        imageStreamReader.setOnImageAvailableListener(null, null);
+                    }
+                });
+    }
+
+  private void setImageStreamImageAvailableListener(final EventChannel.EventSink imageStreamSink, int minPauseBetweenFramesMillis) {
+    AtomicLong lastFrameTakenAt = new AtomicLong(Long.MIN_VALUE);
     imageStreamReader.setOnImageAvailableListener(
         reader -> {
+          if (minPauseBetweenFramesMillis > 0) {
+              // Cannot use System.currentTimeMillis() due to possible time settings change,
+              // see https://developer.android.com/reference/android/os/SystemClock
+              long currentTimeMillis = SystemClock.elapsedRealtime();
+              long knownLastFrameTakenAt = lastFrameTakenAt.get();
+              if (knownLastFrameTakenAt + minPauseBetweenFramesMillis >= currentTimeMillis) {
+                  return;
+              }
+              lastFrameTakenAt.set(currentTimeMillis);
+          }
+
           Image img = reader.acquireLatestImage();
           if (img == null) return;
 

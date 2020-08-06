@@ -379,6 +379,51 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// already started.
   // TODO(bmparr): Add settings for resolution and fps.
   Future<void> startImageStream(onLatestImageAvailable onAvailable) async {
+    _checkStateBeforeOpeningStream();
+
+    try {
+      await _channel.invokeMethod<void>('startImageStream');
+      value = value.copyWith(isStreamingImages: true);
+    } on PlatformException catch (e) {
+      throw CameraException(e.code, e.message);
+    }
+
+    _subscribeForImageStreamEvents(onAvailable);
+  }
+
+  /// Start streaming images from platform camera,
+  /// skipping images if they come too often
+  /// (configured by minPauseBetweenFramesMillis parameter).
+  ///
+  /// Settings for capturing images on iOS and Android is set to always use the
+  /// latest image available from the camera and will drop all other images.
+  ///
+  /// When running continuously with [CameraPreview] widget, this function runs
+  /// best with [ResolutionPreset.low]. Running on [ResolutionPreset.high] can
+  /// have significant frame rate drops for [CameraPreview] on lower end
+  /// devices.
+  ///
+  /// Throws a [CameraException] if image streaming or video recording has
+  /// already started.
+  Future<void> startImageStreamWithThrottling(
+      onLatestImageAvailable onAvailable,
+      int minPauseBetweenFramesMillis) async {
+    _checkStateBeforeOpeningStream();
+
+    try {
+      await _channel.invokeMethod<void>(
+          'startImageStreamWithThrottling', <String, dynamic>{
+        'minPauseBetweenFramesMillis': minPauseBetweenFramesMillis,
+      });
+      value = value.copyWith(isStreamingImages: true);
+    } on PlatformException catch (e) {
+      throw CameraException(e.code, e.message);
+    }
+
+    _subscribeForImageStreamEvents(onAvailable);
+  }
+
+  void _checkStateBeforeOpeningStream() {
     if (!value.isInitialized || _isDisposed) {
       throw CameraException(
         'Uninitialized CameraController',
@@ -397,13 +442,9 @@ class CameraController extends ValueNotifier<CameraValue> {
         'startImageStream was called while a camera was streaming images.',
       );
     }
+  }
 
-    try {
-      await _channel.invokeMethod<void>('startImageStream');
-      value = value.copyWith(isStreamingImages: true);
-    } on PlatformException catch (e) {
-      throw CameraException(e.code, e.message);
-    }
+  void _subscribeForImageStreamEvents(onLatestImageAvailable onAvailable) {
     const EventChannel cameraEventChannel =
         EventChannel('plugins.flutter.io/camera/imageStream');
     _imageStreamSubscription =

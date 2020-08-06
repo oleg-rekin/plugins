@@ -113,6 +113,16 @@ final class MethodCallHandlerImpl implements MethodChannel.MethodCallHandler {
           }
           break;
         }
+      case "startImageStreamWithThrottling":
+      {
+        try {
+          camera.startPreviewWithImageStreamWithThrottling(imageStreamChannel, call.argument("minPauseBetweenFramesMillis"));
+          result.success(null);
+        } catch (Exception e) {
+          handleException(e, result);
+        }
+        break;
+      }
       case "stopImageStream":
         {
           try {

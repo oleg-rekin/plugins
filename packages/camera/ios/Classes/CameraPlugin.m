@@ -886,6 +886,10 @@ FourCharCode const videoFormat = kCVPixelFormatType_32BGRA;
   } else if ([@"startImageStream" isEqualToString:call.method]) {
     [_camera startImageStreamWithMessenger:_messenger];
     result(nil);
+  } else if ([@"startImageStreamWithThrottling" isEqualToString:call.method]) {
+    // Throttling is not supported for iOS, starting normal stream
+    [_camera startImageStreamWithMessenger:_messenger];
+    result(nil);
   } else if ([@"stopImageStream" isEqualToString:call.method]) {
     [_camera stopImageStream];
     result(nil);

@@ -3,7 +3,7 @@ description: A slightly customized Flutter plugin for getting information about 
   camera on Android and iOS. Supports previewing the camera feed, capturing images, capturing video,
   and streaming image buffers to dart.
   Original plugin homepage https://github.com/flutter/plugins/tree/master/packages/camera, based on version 0.5.8+3
-version: 0.5.9
+version: 0.5.10
 
 homepage: https://github.com/oleg-rekin/plugins/tree/master/packages/camera
 
