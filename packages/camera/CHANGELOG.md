@@ -1,6 +1,7 @@
 ## 0.5.9
 
 * Preview image stream resolution limit dropped.
+* Flashlight switch from https://github.com/Renesanse/plugins/tree/flash_light incorporated.
 
 ## 0.5.8+3
 

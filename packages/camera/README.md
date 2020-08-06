@@ -3,7 +3,20 @@
 Based on the Camera plugin from https://github.com/flutter/plugins
 
 Changes list:
-- Preview image stream resolution limit dropped (notice, setting up high resolution may lead to performance drops).
+* Preview image stream resolution limit dropped (notice, setting up high resolution may lead to performance drops).
+* Flashlight switch from https://github.com/Renesanse/plugins/tree/flash_light incorporated
+  (Based on https://github.com/Renesanse/plugins/commit/fd7cffb44b0f86f5e467180c62cea44df7172651 commit).
+
+## Installation
+
+Add `camera` as a [dependency in your pubspec.yaml file](https://flutter.io/using-packages/), then continue as described in the original README below.
+
+```
+  camera:
+    git:
+      url: git://github.com/oleg-rekin/plugins.git
+      path: packages/camera
+```
 
 # Original README content:
 
