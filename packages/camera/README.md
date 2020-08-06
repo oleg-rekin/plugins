@@ -1,5 +1,12 @@
 # Camera Plugin
 
+Based on the Camera plugin from https://github.com/flutter/plugins
+
+Changes list:
+- Preview image stream resolution limit dropped (notice, setting up high resolution may lead to performance drops).
+
+# Original README content:
+
 [![pub package](https://img.shields.io/pub/v/camera.svg)](https://pub.dartlang.org/packages/camera)
 
 A Flutter plugin for iOS and Android allowing access to the device cameras.

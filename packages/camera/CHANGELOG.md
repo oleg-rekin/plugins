@@ -1,3 +1,7 @@
+## 0.5.9
+
+* Preview image stream resolution limit dropped.
+
 ## 0.5.8+3
 
 * Fix bug in usage example in README.md 
